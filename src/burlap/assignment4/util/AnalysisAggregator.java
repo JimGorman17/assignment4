@@ -1,18 +1,21 @@
 package burlap.assignment4.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public final class AnalysisAggregator {
 	private static List<Integer> numIterations = new ArrayList<Integer>();
 	private static List<Integer> stepsToFinishValueIteration = new ArrayList<Integer>();
 	private static List<Integer> stepsToFinishPolicyIteration = new ArrayList<Integer>();
 	private static List<Integer> stepsToFinishQLearning = new ArrayList<Integer>();
+	private static Map<Double, List<Integer>> stepsToFinishQLearningWithEpsilon = new TreeMap<Double, List<Integer>>();
+	private static Map<Double, List<Integer>> stepsToFinishQLearningWithLearningRate = new TreeMap<Double, List<Integer>>();
 	
 	private static List<Integer> millisecondsToFinishValueIteration = new ArrayList<Integer>();
 	private static List<Integer> millisecondsToFinishPolicyIteration = new ArrayList<Integer>();
-	private static List<Integer> millisecondsToFinishQLearning = new ArrayList<Integer>();
-	
+	private static List<Long> millisecondsToFinishQLearning = new ArrayList<Long>();
+	private static Map<Double, List<Long>> millisecondsToFinishQLearningWithEpsilon = new TreeMap<Double, List<Long>>();
+	private static Map<Double, List<Long>> millisecondsToFinishQLearningWithLearningRate = new TreeMap<Double, List<Long>>();
+
 	public static void addNumberOfIterations(Integer numIterations1){
 		numIterations.add(numIterations1);
 	}
@@ -24,6 +27,14 @@ public final class AnalysisAggregator {
 	}
 	public static void addStepsToFinishQLearning(Integer stepsToFinishQLearning1){
 		stepsToFinishQLearning.add(stepsToFinishQLearning1);
+	}
+	public static void addStepsToFinishQLearning(Integer stepsToFinishQLearning1, double epsilonValue){
+		if (stepsToFinishQLearningWithEpsilon.get(epsilonValue) == null) stepsToFinishQLearningWithEpsilon.put(epsilonValue, new ArrayList<Integer>());
+		stepsToFinishQLearningWithEpsilon.get(epsilonValue).add(stepsToFinishQLearning1);
+	}
+	public static void addStepsToFinishQLearningWithLearningRateVariation(Integer stepsToFinishQLearning1, double learningRate){
+		if (stepsToFinishQLearningWithLearningRate.get(learningRate) == null) stepsToFinishQLearningWithLearningRate.put(learningRate, new ArrayList<Integer>());
+		stepsToFinishQLearningWithLearningRate.get(learningRate).add(stepsToFinishQLearning1);
 	}
 	public static void printValueIterationResults(){
 		System.out.print("Value Iteration,");	
@@ -37,7 +48,20 @@ public final class AnalysisAggregator {
 		System.out.print("Q Learning,");	
 		printList(stepsToFinishQLearning);
 	}
-	
+	public static void printQLearningWithEpsilonResults(){
+		for (Double key : stepsToFinishQLearningWithEpsilon.keySet()) {
+			List<Integer> values = stepsToFinishQLearningWithEpsilon.get(key);
+			System.out.print(String.format("%,.1f,", key));
+			printList(values);
+		}
+	}
+	public static void printQLearningWithLearningRateResults(){
+		for (Double key : stepsToFinishQLearningWithLearningRate.keySet()) {
+			List<Integer> values = stepsToFinishQLearningWithLearningRate.get(key);
+			System.out.print(String.format("%,.1f,", key));
+			printList(values);
+		}
+	}
 
 	public static void addMillisecondsToFinishValueIteration(Integer millisecondsToFinishValueIteration1){
 		millisecondsToFinishValueIteration.add(millisecondsToFinishValueIteration1);
@@ -45,11 +69,19 @@ public final class AnalysisAggregator {
 	public static void addMillisecondsToFinishPolicyIteration(Integer millisecondsToFinishPolicyIteration1){
 		millisecondsToFinishPolicyIteration.add(millisecondsToFinishPolicyIteration1);
 	}
-	public static void addMillisecondsToFinishQLearning(Integer millisecondsToFinishQLearning1){
+	public static void addMillisecondsToFinishQLearning(long millisecondsToFinishQLearning1){
 		millisecondsToFinishQLearning.add(millisecondsToFinishQLearning1);
 	}
+	public static void addMillisecondsToFinishQLearning(long millisecondsToFinishQLearning1, double epsilonValue){
+		if (millisecondsToFinishQLearningWithEpsilon.get(epsilonValue) == null) millisecondsToFinishQLearningWithEpsilon.put(epsilonValue, new ArrayList<Long>());
+		millisecondsToFinishQLearningWithEpsilon.get(epsilonValue).add(millisecondsToFinishQLearning1);
+	}
+	public static void addMillisecondsToFinishQLearningWithLearningRateVariation(long millisecondsToFinishQLearning1, double learningRate){
+		if (millisecondsToFinishQLearningWithLearningRate.get(learningRate) == null) millisecondsToFinishQLearningWithLearningRate.put(learningRate, new ArrayList<Long>());
+		millisecondsToFinishQLearningWithLearningRate.get(learningRate).add(millisecondsToFinishQLearning1);
+	}
 	public static void printValueIterationTimeResults(){
-		System.out.print("Value Iteration,");	
+		System.out.print("Value Iteration,");
 		printList(millisecondsToFinishValueIteration);
 	}
 	public static void printPolicyIterationTimeResults(){
@@ -58,9 +90,22 @@ public final class AnalysisAggregator {
 	}
 	public static void printQLearningTimeResults(){
 		System.out.print("Q Learning,");	
-		printList(millisecondsToFinishQLearning);
+		printListOfLongs(millisecondsToFinishQLearning);
 	}
-	
+	public static void printQLearningTimeWithEpsilonResults(){
+		for (Double key : millisecondsToFinishQLearningWithEpsilon.keySet()) {
+			List<Long> values = millisecondsToFinishQLearningWithEpsilon.get(key);
+			System.out.print(String.format("%,.1f,", key));
+			printListOfLongs(values);
+		}
+	}
+	public static void printQLearningTimeWithLearningRateResults(){
+		for (Double key : millisecondsToFinishQLearningWithLearningRate.keySet()) {
+			List<Long> values = millisecondsToFinishQLearningWithLearningRate.get(key);
+			System.out.print(String.format("%,.1f,", key));
+			printListOfLongs(values);
+		}
+	}
 	public static void printNumIterations(){
 		System.out.print("Iterations,");	
 		printList(numIterations);
@@ -68,6 +113,17 @@ public final class AnalysisAggregator {
 	private static void printList(List<Integer> valueList){
 		int counter = 0;
 		for(int value : valueList){
+			System.out.print(String.valueOf(value));
+			if(counter != valueList.size()-1){
+				System.out.print(",");
+			}
+			counter++;
+		}
+		System.out.println();
+	}
+	private static void printListOfLongs(List<Long> valueList){
+		int counter = 0;
+		for(Long value : valueList){
 			System.out.print(String.valueOf(value));
 			if(counter != valueList.size()-1){
 				System.out.print(",");
@@ -84,6 +140,8 @@ public final class AnalysisAggregator {
 		printValueIterationResults();
 		printPolicyIterationResults();
 		printQLearningResults();
+		printQLearningWithEpsilonResults();
+		printQLearningWithLearningRateResults();
 		System.out.println();
 		System.out.println("The data below shows the number of milliseconds the algorithm required to generate \n"
 				+ "the optimal policy given the number of iterations the algorithm was run.");
@@ -91,5 +149,7 @@ public final class AnalysisAggregator {
 		printValueIterationTimeResults();
 		printPolicyIterationTimeResults();
 		printQLearningTimeResults();
+		printQLearningTimeWithEpsilonResults();
+		printQLearningTimeWithLearningRateResults();
 	}
 }

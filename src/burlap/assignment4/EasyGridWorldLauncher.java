@@ -5,6 +5,7 @@ import burlap.assignment4.util.AnalysisRunner;
 import burlap.assignment4.util.BasicRewardFunction;
 import burlap.assignment4.util.BasicTerminalFunction;
 import burlap.assignment4.util.MapPrinter;
+import burlap.behavior.policy.EpsilonGreedy;
 import burlap.oomdp.core.Domain;
 import burlap.oomdp.core.TerminalFunction;
 import burlap.oomdp.core.states.State;
@@ -15,17 +16,19 @@ import burlap.oomdp.visualizer.Visualizer;
 
 public class EasyGridWorldLauncher {
 	//These are some boolean variables that affect what will actually get executed
-	private static boolean visualizeInitialGridWorld = true; //Loads a GUI with the agent, walls, and goal
+	private static boolean visualizeInitialGridWorld = false; //Loads a GUI with the agent, walls, and goal
 	
 	//runValueIteration, runPolicyIteration, and runQLearning indicate which algorithms will run in the experiment
-	private static boolean runValueIteration = true; 
-	private static boolean runPolicyIteration = true;
-	private static boolean runQLearning = true;
+	private static boolean runValueIteration = false;
+	private static boolean runPolicyIteration = false;
+	private static boolean runQLearning = false;
+	private static boolean runQLearningWithEpsilonVariation = false;
+	private static boolean runQLearningWithLearningRateVariation = true;
 	
 	//showValueIterationPolicyMap, showPolicyIterationPolicyMap, and showQLearningPolicyMap will open a GUI
 	//you can use to visualize the policy maps. Consider only having one variable set to true at a time
 	//since the pop-up window does not indicate what algorithm was used to generate the map.
-	private static boolean showValueIterationPolicyMap = true; 
+	private static boolean showValueIterationPolicyMap = false;
 	private static boolean showPolicyIterationPolicyMap = false;
 	private static boolean showQLearningPolicyMap = false;
 	
@@ -38,7 +41,7 @@ public class EasyGridWorldLauncher {
 			{ 0, 1, 1, 1, 0},
 			{ 1, 0, 1, 1, 0},
 			{ 0, 0, 0, 0, 0}, };
-	
+
 //	private static Integer mapLen = map.length-1;
 
 	public static void main(String[] args) {
@@ -76,10 +79,18 @@ public class EasyGridWorldLauncher {
 		if(runQLearning){
 			runner.runQLearning(gen,domain,initialState, rf, tf, env, showQLearningPolicyMap);
 		}
+		if (runQLearningWithEpsilonVariation) {
+			for (double i = .1; i <= .9; i+=.1) {
+				runner.runQLearning(gen, domain, initialState, rf, tf, env, showQLearningPolicyMap, i);
+			}
+		}
+		if (runQLearningWithLearningRateVariation) {
+			for (double i = .1; i <= .9; i+=.1) {
+				runner.runQLearningWithLearningRateVariation(gen, domain, initialState, rf, tf, env, showQLearningPolicyMap, i);
+			}
+		}
 		AnalysisAggregator.printAggregateAnalysis();
 	}
-
-
 
 	private static void visualizeInitialGridWorld(Domain domain,
 			BasicGridWorld gen, SimulatedEnvironment env) {

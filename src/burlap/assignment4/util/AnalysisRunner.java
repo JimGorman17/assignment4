@@ -1,6 +1,7 @@
 package burlap.assignment4.util;
 
 import burlap.assignment4.BasicGridWorld;
+import burlap.behavior.policy.EpsilonGreedy;
 import burlap.behavior.policy.Policy;
 import burlap.behavior.singleagent.EpisodeAnalysis;
 import burlap.behavior.singleagent.auxiliary.StateReachability;
@@ -142,7 +143,8 @@ public class AnalysisRunner {
 				domain,
 				0.99,
 				hashingFactory,
-				0.99, 0.99);
+				0.99,
+				0.99);
 			
 			for (int i = 0; i < numIterations; i++) {
 				ea = agent.runLearningEpisode(env);
@@ -150,11 +152,92 @@ public class AnalysisRunner {
 			}
 			agent.initializeForPlanning(rf, tf, 1);
 			p = agent.planFromState(initialState);
-			AnalysisAggregator.addMillisecondsToFinishQLearning((int) (System.nanoTime()-startTime)/1000000);
+			AnalysisAggregator.addMillisecondsToFinishQLearning((long) (System.nanoTime()-startTime)/1000000);
 			AnalysisAggregator.addStepsToFinishQLearning(ea.numTimeSteps());
 
 		}
 		AnalysisAggregator.printQLearningResults();
+		MapPrinter.printPolicyMap(getAllStates(domain,rf,tf,initialState), p, gen.getMap());
+		System.out.println("\n\n");
+
+		//visualize the value function and policy.
+		if(showPolicyMap){
+			simpleValueFunctionVis((ValueFunction)agent, p, initialState, domain, hashingFactory);
+		}
+
+	}
+
+	public void runQLearning(BasicGridWorld gen, Domain domain,
+							 State initialState, RewardFunction rf, TerminalFunction tf,
+							 SimulatedEnvironment env, boolean showPolicyMap, double epsilonValue) {
+		System.out.println(String.format("//Q Learning Analysis with Epsilon Value: %,.1f//", epsilonValue));
+
+		QLearning agent = null;
+		Policy p = null;
+		EpisodeAnalysis ea = null;
+		int increment = MAX_ITERATIONS/NUM_INTERVALS;
+		for(int numIterations = increment;numIterations<=MAX_ITERATIONS;numIterations+=increment ){
+			long startTime = System.nanoTime();
+
+			agent = new QLearning(
+					domain,
+					0.99,
+					hashingFactory,
+					0.99,
+					0.99);
+			agent.setLearningPolicy(new EpsilonGreedy(agent, epsilonValue));
+
+			for (int i = 0; i < numIterations; i++) {
+				ea = agent.runLearningEpisode(env);
+				env.resetEnvironment();
+			}
+			agent.initializeForPlanning(rf, tf, 1);
+			p = agent.planFromState(initialState);
+			AnalysisAggregator.addMillisecondsToFinishQLearning((long) (System.nanoTime()-startTime)/1000000, epsilonValue);
+			AnalysisAggregator.addStepsToFinishQLearning(ea.numTimeSteps(), epsilonValue);
+
+		}
+		AnalysisAggregator.printQLearningResults();
+		MapPrinter.printPolicyMap(getAllStates(domain,rf,tf,initialState), p, gen.getMap());
+		System.out.println("\n\n");
+
+		//visualize the value function and policy.
+		if(showPolicyMap){
+			simpleValueFunctionVis((ValueFunction)agent, p, initialState, domain, hashingFactory);
+		}
+
+	}
+
+	public void runQLearningWithLearningRateVariation(BasicGridWorld gen, Domain domain,
+							 State initialState, RewardFunction rf, TerminalFunction tf,
+							 SimulatedEnvironment env, boolean showPolicyMap, double learningRate) {
+		System.out.println(String.format("//Q Learning Analysis with Learning Rate: %,.1f//", learningRate));
+
+		QLearning agent = null;
+		Policy p = null;
+		EpisodeAnalysis ea = null;
+		int increment = MAX_ITERATIONS/NUM_INTERVALS;
+		for(int numIterations = increment;numIterations<=MAX_ITERATIONS;numIterations+=increment ){
+			long startTime = System.nanoTime();
+
+			agent = new QLearning(
+					domain,
+					0.99,
+					hashingFactory,
+					0.99,
+					learningRate);
+
+			for (int i = 0; i < numIterations; i++) {
+				ea = agent.runLearningEpisode(env);
+				env.resetEnvironment();
+			}
+			agent.initializeForPlanning(rf, tf, 1);
+			p = agent.planFromState(initialState);
+			AnalysisAggregator.addMillisecondsToFinishQLearningWithLearningRateVariation((long) (System.nanoTime()-startTime)/1000000, learningRate);
+			AnalysisAggregator.addStepsToFinishQLearningWithLearningRateVariation(ea.numTimeSteps(), learningRate);
+
+		}
+		AnalysisAggregator.printQLearningTimeWithLearningRateResults();
 		MapPrinter.printPolicyMap(getAllStates(domain,rf,tf,initialState), p, gen.getMap());
 		System.out.println("\n\n");
 
